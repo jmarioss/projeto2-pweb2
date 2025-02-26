@@ -7,7 +7,7 @@ const Cliente = sequelize.define('cliente', {
     email: { type: DataTypes.STRING(100), allowNull: false, unique: true },
     telefone: { type: DataTypes.STRING(20) }
 }, {
-    timestamps: true // Adiciona createdAt e updatedAt
+    timestamps: true 
 });
 
 module.exports = Cliente;

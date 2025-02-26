@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const Quarto = require('../models/quarto');
 
-// Cadastrar novo quarto
 router.post('/', async (req, res) => {
     try {
         const { tipo, preco, disponibilidade } = req.body;
@@ -13,7 +12,6 @@ router.post('/', async (req, res) => {
     }
 });
 
-// Listar quartos
 router.get('/', async (req, res) => {
     try {
         const quartos = await Quarto.findAll();
@@ -23,7 +21,6 @@ router.get('/', async (req, res) => {
     }
 });
 
-// Atualizar quarto
 router.put('/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -35,9 +32,5 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-// Verificar disponibilidade
-router.get('/disponibilidade', async (req, res) => {
-    // Lógica para verificar disponibilidade
-});
 
 module.exports = router;

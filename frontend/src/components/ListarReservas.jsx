@@ -19,6 +19,11 @@ const ListarReservas = () => {
                 {reservas.map(reserva => (
                     <li key={reserva.id}>
                         Cliente ID: {reserva.cliente_id} - Quarto ID: {reserva.quarto_id} - Check-in: {reserva.data_checkin} - Check-out: {reserva.data_checkout}
+                        <ul>
+                            {reserva.hospedes.map(hospede => (
+                                <li key={hospede.id}>Hóspede: {hospede.nome}</li>
+                            ))}
+                        </ul>
                     </li>
                 ))}
             </ul>

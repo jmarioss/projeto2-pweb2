@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const Cliente = require('../models/cliente');
 
-// Cadastrar cliente
 router.post('/', async (req, res) => {
     try {
         const { nome, email, telefone } = req.body;
@@ -13,7 +12,6 @@ router.post('/', async (req, res) => {
     }
 });
 
-// Listar clientes
 router.get('/', async (req, res) => {
     try {
         const clientes = await Cliente.findAll();

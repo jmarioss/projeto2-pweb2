@@ -7,7 +7,7 @@ const Quarto = sequelize.define('quarto', {
     preco: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
     disponibilidade: { type: DataTypes.BOOLEAN, defaultValue: true }
 }, {
-    timestamps: true // Adiciona createdAt e updatedAt
+    timestamps: true 
 });
 
 module.exports = Quarto;
