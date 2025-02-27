@@ -2,14 +2,14 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
 const ListarReservas = () => {
-    const [reservas, setReservas] = useState([]);
+    const [reservas, setReservas] = useState([]); // Estado para armazenar reservas
 
     useEffect(() => {
         const fetchReservas = async () => {
             try {
                 const response = await axios.get('http://localhost:3001/reservas');
                 console.log('Reservas recebidas:', response.data); // Log para verificar a resposta
-                setReservas(response.data);
+                setReservas(response.data); // Atualiza o estado com as reservas recebidas
             } catch (error) {
                 console.error('Erro ao buscar reservas:', error);
             }
@@ -26,7 +26,7 @@ const ListarReservas = () => {
                 <ul>
                     {reservas.map(reserva => (
                         <li key={reserva.id}>
-                            Quarto ID: {reserva.quarto_id} - Check-in: {reserva.data_checkin} - Check-out: {reserva.data_checkout}
+                            Quarto ID: {reserva.quarto_id} - Tipo: {reserva.quarto.tipo} - Check-in: {reserva.data_checkin} - Check-out: {reserva.data_checkout}
                         </li>
                     ))}
                 </ul>

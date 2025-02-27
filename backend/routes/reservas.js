@@ -2,81 +2,52 @@ const express = require('express');
 const router = express.Router();
 const Reserva = require('../models/reserva');
 const Hospede = require('../models/hospede'); // Importar o modelo de hóspedes
-
-
-router.post('/', async (req, res) => {
-    try {
-        const { cliente_id, quarto_id, data_checkin, data_checkout, hospedes } = req.body;
-
-        // Verificar se o número de hóspedes não excede 3
-        if (hospedes.length > 3) {
-            return res.status(400).json({ error: 'O número máximo de hóspedes é 3.' });
-        }
-
-        const novaReserva = await Reserva.create({ cliente_id, quarto_id, data_checkin, data_checkout });
-
-        // Adicionar hóspedes à reserva
-        for (const hospede of hospedes) {
-            await Hospede.create({ nome: hospede.nome, reserva_id: novaReserva.id });
-        }
-
-        res.status(201).json(novaReserva);
-    } catch (error) {
-        res.status(500).json({ error: 'Erro ao cadastrar reserva' });
-    }
-});
-
-
-router.post('/', async (req, res) => {
-    try {
-        const { cliente_id, quarto_id, data_checkin, data_checkout, hospedes } = req.body;
-
-        // Verificar se o número de hóspedes não excede 3
-        if (hospedes.length > 3) {
-            return res.status(400).json({ error: 'O número máximo de hóspedes é 3.' });
-        }
-
-        // Verificar disponibilidade do quarto
-        const reservasExistentes = await Reserva.findAll({
-            where: {
-                quarto_id,
-                [Op.or]: [
-                    {
-                        data_checkin: {
-                            [Op.lte]: data_checkout, // check-in é antes do check-out
-                        },
-                        data_checkout: {
-                            [Op.gte]: data_checkin, // check-out é depois do check-in
-                        },
-                    },
-                ],
-            },
-        });
-
-        if (reservasExistentes.length > 0) {
-            return res.status(400).json({ error: 'O quarto já está reservado para essas datas.' });
-        }
-
-        const novaReserva = await Reserva.create({ cliente_id, quarto_id, data_checkin, data_checkout });
-
-        // Adicionar hóspedes à reserva
-        for (const hospede of hospedes) {
-            await Hospede.create({ nome: hospede.nome, reserva_id: novaReserva.id });
-        }
-
-        res.status(201).json(novaReserva);
-    } catch (error) {
-        res.status(500).json({ error: 'Erro ao cadastrar reserva' });
-    }
-});
+const Quarto = require('../models/quarto'); // Importar o modelo de Quarto
+const { Sequelize } = require('sequelize');
 
 router.get('/', async (req, res) => {
     try {
-        const reservas = await Reserva.findAll(); // Busca todas as reservas
-        res.json(reservas); // Retorna as reservas
+        const reservas = await Reserva.findAll({
+            include: [
+                {
+                    model: Quarto, // Inclui o modelo Quarto
+                    attributes: ['id', 'tipo'] // Especifica os atributos que você deseja retornar
+                }
+            ]
+        });
+        res.json(reservas); // Retorna as reservas com os quartos
     } catch (error) {
         console.error('Erro ao listar reservas:', error); // Log do erro
         res.status(500).json({ error: 'Erro ao listar reservas' }); // Retorna erro
+    }
+});
+
+router.post('/', async (req, res) => {
+    try {
+        const { cliente_id, quarto_id, data_checkin, data_checkout, hospedes } = req.body;
+
+        // Verificar se o número de hóspedes não excede 3
+        if (hospedes.length > 3) {
+            return res.status(400).json({ error: 'O número máximo de hóspedes é 3.' });
+        }
+
+        // Criar nova reserva
+        const novaReserva = await Reserva.create({
+            cliente_id, // Usar diretamente o cliente_id
+            quarto_id,
+            data_checkin,
+            data_checkout
+        });
+
+        // Adicionar hóspedes à reserva
+        for (const id of hospedes) {
+            await Hospede.create({ nome: id, reserva_id: novaReserva.id }); // Certifique-se de que está passando o nome correto
+        }
+
+        res.status(201).json(novaReserva); // Retorna a nova reserva criada
+    } catch (error) {
+        console.error('Erro ao cadastrar reserva:', error); // Log do erro
+        res.status(500).json({ error: 'Erro ao cadastrar reserva' }); // Retorna erro
     }
 });
 
