@@ -1,73 +1,115 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import api from '../services/api'; // Ajuste o caminho conforme necessário
 
-const CadastrarReserva = () => {
-    const [cliente_id, setClienteId] = useState('');
-    const [quarto_id, setQuartoId] = useState('');
-    const [data_checkin, setDataCheckin] = useState('');
-    const [data_checkout, setDataCheckout] = useState('');
-    const [hospedes, setHospedes] = useState([{ nome: '' }]);
-    const [mensagemSucesso, setMensagemSucesso] = useState('');
+const CadastrarReservas = () => {
+  const [clientes, setClientes] = useState([]);
+  const [quartos, setQuartos] = useState([]);
+  const [hospedesSelecionados, setHospedesSelecionados] = useState([]);
+  const [quartoSelecionado, setQuartoSelecionado] = useState('');
+  const [dataCheckin, setDataCheckin] = useState('');
+  const [dataCheckout, setDataCheckout] = useState('');
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        if (hospedes.length > 3) {
-            alert('O número máximo de hóspedes é 3.');
-            return;
-        }
-
-        try {
-            await axios.post('http://localhost:3001/reservas', { 
-                cliente_id, 
-                quarto_id, 
-                data_checkin, 
-                data_checkout, 
-                hospedes 
-            });
-            setMensagemSucesso('Reserva cadastrada com sucesso!'); // Mensagem de sucesso
-            // Limpar os campos após o cadastro
-            setClienteId('');
-            setQuartoId('');
-            setDataCheckin('');
-            setDataCheckout('');
-            setHospedes([{ nome: '' }]);
-        } catch (error) {
-            alert('Erro ao cadastrar reserva');
-        }
+  useEffect(() => {
+    const fetchClientes = async () => {
+      try {
+        const response = await api.get('/clientes');
+        setClientes(response.data);
+      } catch (error) {
+        console.error('Erro ao buscar clientes:', error);
+      }
     };
 
-    const handleHospedeChange = (index, value) => {
-        const newHospedes = [...hospedes];
-        newHospedes[index].nome = value;
-        setHospedes(newHospedes);
-    };
+    fetchClientes();
+  }, []);
 
-    const addHospede = () => {
-        if (hospedes.length < 3) {
-            setHospedes([...hospedes, { nome: '' }]);
-        }
-    };
+  const fetchQuartos = async () => {
+    try {
+      const response = await api.get('/quartos'); // Usando a mesma rota do listar quartos
+      setQuartos(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar quartos:', error);
+    }
+  };
 
-    return (
-        <form onSubmit={handleSubmit}>
-            <input type="number" value={cliente_id} onChange={(e) => setClienteId(e.target.value)} placeholder="ID do Cliente" />
-            <input type="number" value={quarto_id} onChange={(e) => setQuartoId(e.target.value)} placeholder="ID do Quarto" />
-            <input type="date" value={data_checkin} onChange={(e) => setDataCheckin(e.target.value)} />
-            <input type="date" value={data_checkout} onChange={(e) => setDataCheckout(e.target.value)} />
-            {hospedes.map((hospede, index) => (
-                <input 
-                    key={index} 
-                    value={hospede.nome} 
-                    onChange={(e) => handleHospedeChange(index, e.target.value)} 
-                    placeholder={`Nome do Hóspede ${index + 1}`} 
-                />
-            ))}
-            <button type="button" onClick={addHospede}>Adicionar Hóspede</button>
-            <button type="submit">Cadastrar Reserva</button>
-            {mensagemSucesso && <p>{mensagemSucesso}</p>} {/* Exibir mensagem de sucesso */}
-        </form>
-    );
+  useEffect(() => {
+    fetchQuartos(); // Chama a função para buscar quartos ao montar o componente
+  }, []);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Lógica para enviar a reserva, usando hospedesSelecionados e quartoSelecionado
+  };
+
+  const addHospede = () => {
+    if (hospedesSelecionados.length < 3) {
+      setHospedesSelecionados([...hospedesSelecionados, '']);
+    } else {
+      alert('Você já selecionou 3 hóspedes.');
+    }
+  };
+
+  const handleHospedeChange = (index, value) => {
+    const newHospedes = [...hospedesSelecionados];
+    newHospedes[index] = value;
+    setHospedesSelecionados(newHospedes);
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <label htmlFor="hospede">Selecione os Hóspedes:</label>
+      {hospedesSelecionados.map((hospede, index) => (
+        <select
+          key={index}
+          value={hospede}
+          onChange={(e) => handleHospedeChange(index, e.target.value)}
+        >
+          <option value="">Selecione um hóspede</option>
+          {clientes.map(cliente => (
+            <option key={cliente.id} value={cliente.id}>
+              {cliente.nome}
+            </option>
+          ))}
+        </select>
+      ))}
+      <button type="button" onClick={addHospede}>Adicionar Hóspede</button>
+
+      <label htmlFor="dataCheckin">Data de Check-in:</label>
+      <input
+        type="date"
+        id="dataCheckin"
+        value={dataCheckin}
+        onChange={(e) => setDataCheckin(e.target.value)}
+      />
+
+      <label htmlFor="dataCheckout">Data de Check-out:</label>
+      <input
+        type="date"
+        id="dataCheckout"
+        value={dataCheckout}
+        onChange={(e) => setDataCheckout(e.target.value)}
+      />
+
+      <label htmlFor="quarto">Selecione o Quarto:</label>
+      <select
+        id="quarto"
+        value={quartoSelecionado}
+        onChange={(e) => setQuartoSelecionado(e.target.value)}
+      >
+        <option value="">Selecione um quarto</option>
+        {quartos.length > 0 ? (
+          quartos.filter(quarto => quarto.disponibilidade).map((quarto) => (
+            <option key={quarto.id} value={quarto.id}>
+              {quarto.tipo} - R${quarto.preco} - Disponível: Sim
+            </option>
+          ))
+        ) : (
+          <option value="">Nenhum quarto disponível</option>
+        )}
+      </select>
+
+      <button type="submit">Cadastrar Reserva</button>
+    </form>
+  );
 };
 
-export default CadastrarReserva;
+export default CadastrarReservas;

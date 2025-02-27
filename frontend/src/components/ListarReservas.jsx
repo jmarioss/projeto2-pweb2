@@ -6,8 +6,13 @@ const ListarReservas = () => {
 
     useEffect(() => {
         const fetchReservas = async () => {
-            const response = await axios.get('http://localhost:3001/reservas');
-            setReservas(response.data);
+            try {
+                const response = await axios.get('http://localhost:3001/reservas');
+                console.log('Reservas recebidas:', response.data); // Log para verificar a resposta
+                setReservas(response.data);
+            } catch (error) {
+                console.error('Erro ao buscar reservas:', error);
+            }
         };
         fetchReservas();
     }, []);
@@ -15,18 +20,17 @@ const ListarReservas = () => {
     return (
         <div>
             <h2>Lista de Reservas</h2>
-            <ul>
-                {reservas.map(reserva => (
-                    <li key={reserva.id}>
-                        Cliente ID: {reserva.cliente_id} - Quarto ID: {reserva.quarto_id} - Check-in: {reserva.data_checkin} - Check-out: {reserva.data_checkout}
-                        <ul>
-                            {reserva.hospedes.map(hospede => (
-                                <li key={hospede.id}>Hóspede: {hospede.nome}</li>
-                            ))}
-                        </ul>
-                    </li>
-                ))}
-            </ul>
+            {reservas.length === 0 ? (
+                <p>Nenhuma reserva encontrada.</p> // Mensagem quando não há reservas
+            ) : (
+                <ul>
+                    {reservas.map(reserva => (
+                        <li key={reserva.id}>
+                            Quarto ID: {reserva.quarto_id} - Check-in: {reserva.data_checkin} - Check-out: {reserva.data_checkout}
+                        </li>
+                    ))}
+                </ul>
+            )}
         </div>
     );
 };

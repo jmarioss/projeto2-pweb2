@@ -3,6 +3,7 @@ const router = express.Router();
 const Reserva = require('../models/reserva');
 const Hospede = require('../models/hospede'); // Importar o modelo de hóspedes
 
+
 router.post('/', async (req, res) => {
     try {
         const { cliente_id, quarto_id, data_checkin, data_checkout, hospedes } = req.body;
@@ -25,14 +26,6 @@ router.post('/', async (req, res) => {
     }
 });
 
-router.get('/', async (req, res) => {
-    try {
-        const reservas = await Reserva.findAll({ include: Hospede }); // Incluir hóspedes nas reservas
-        res.json(reservas);
-    } catch (error) {
-        res.status(500).json({ error: 'Erro ao listar reservas' });
-    }
-});
 
 router.post('/', async (req, res) => {
     try {
@@ -79,38 +72,11 @@ router.post('/', async (req, res) => {
 
 router.get('/', async (req, res) => {
     try {
-        const { cliente_id, quarto_id, data_checkin, data_checkout } = req.query;
-
-        const whereConditions = {};
-
-        if (cliente_id) {
-            whereConditions.cliente_id = cliente_id;
-        }
-
-        if (quarto_id) {
-            whereConditions.quarto_id = quarto_id;
-        }
-
-        if (data_checkin) {
-            whereConditions.data_checkin = {
-                [Op.gte]: data_checkin, // Filtrar reservas a partir da data de check-in
-            };
-        }
-
-        if (data_checkout) {
-            whereConditions.data_checkout = {
-                [Op.lte]: data_checkout, // Filtrar reservas até a data de check-out
-            };
-        }
-
-        const reservas = await Reserva.findAll({
-            where: whereConditions,
-            include: Hospede, // Incluir hóspedes nas reservas
-        });
-
-        res.json(reservas);
+        const reservas = await Reserva.findAll(); // Busca todas as reservas
+        res.json(reservas); // Retorna as reservas
     } catch (error) {
-        res.status(500).json({ error: 'Erro ao listar reservas' });
+        console.error('Erro ao listar reservas:', error); // Log do erro
+        res.status(500).json({ error: 'Erro ao listar reservas' }); // Retorna erro
     }
 });
 

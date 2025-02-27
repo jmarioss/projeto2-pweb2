@@ -1,7 +1,11 @@
 const express = require('express');
 const router = express.Router();
+const { Op } = require('sequelize'); // Importar Op para condições de consulta
 const Quarto = require('../models/quarto');
+const Reserva = require('../models/reserva'); // Importar o modelo de Reserva
+const { Sequelize } = require('sequelize');
 
+// Rota para cadastrar um novo quarto
 router.post('/', async (req, res) => {
     try {
         const { tipo, preco, disponibilidade } = req.body;
@@ -12,6 +16,7 @@ router.post('/', async (req, res) => {
     }
 });
 
+// Rota para listar todos os quartos
 router.get('/', async (req, res) => {
     try {
         const quartos = await Quarto.findAll();
@@ -21,6 +26,7 @@ router.get('/', async (req, res) => {
     }
 });
 
+// Rota para atualizar um quarto
 router.put('/:id', async (req, res) => {
     try {
         const { id } = req.params;
