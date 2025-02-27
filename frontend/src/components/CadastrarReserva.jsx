@@ -47,7 +47,11 @@ const CadastrarReservas = () => {
   };
 
   const addHospede = () => {
-    setHospedesSelecionados([...hospedesSelecionados, '']); // Adiciona um novo hóspede vazio
+    if (hospedesSelecionados.length < 3) {
+      setHospedesSelecionados([...hospedesSelecionados, '']);
+    } else {
+      alert('Você já selecionou 3 hóspedes.');
+    }
   };
 
   const handleSubmit = async (e) => {
