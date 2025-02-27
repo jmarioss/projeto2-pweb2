@@ -4,6 +4,7 @@ import api from '../services/api'; // Ajuste o caminho conforme necessário
 const CadastrarReservas = () => {
   const [clientes, setClientes] = useState([]);
   const [quartos, setQuartos] = useState([]);
+  const [quartosDisponiveis, setQuartosDisponiveis] = useState([]); // Estado para quartos disponíveis
   const [hospedesSelecionados, setHospedesSelecionados] = useState(['']); // Iniciar com um hóspede vazio
   const [quartoSelecionado, setQuartoSelecionado] = useState('');
   const [dataCheckin, setDataCheckin] = useState('');
@@ -25,15 +26,18 @@ const CadastrarReservas = () => {
 
   const fetchQuartos = async () => {
     try {
-      const response = await api.get('/quartos');
+      const response = await api.get('/quartos'); // Usando a rota para buscar todos os quartos
       setQuartos(response.data);
+      // Filtra os quartos disponíveis
+      const quartosDisponiveis = response.data.filter(quarto => quarto.disponibilidade);
+      setQuartosDisponiveis(quartosDisponiveis);
     } catch (error) {
       console.error('Erro ao buscar quartos:', error);
     }
   };
 
   useEffect(() => {
-    fetchQuartos();
+    fetchQuartos(); // Chama a função para buscar todos os quartos
   }, []);
 
   const handleHospedeChange = (index, value) => {
@@ -133,8 +137,8 @@ const CadastrarReservas = () => {
         required
       >
         <option value="">Selecione um quarto</option>
-        {quartos.length > 0 ? (
-          quartos.filter(quarto => quarto.disponibilidade).map((quarto) => (
+        {quartosDisponiveis.length > 0 ? (
+          quartosDisponiveis.map((quarto) => (
             <option key={quarto.id} value={quarto.id}>
               {quarto.tipo} - R${quarto.preco} - Disponível: Sim
             </option>
